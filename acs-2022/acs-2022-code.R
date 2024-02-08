@@ -12,7 +12,7 @@ library(tidycensus)
 
 median_value <- get_acs(
   geography = "county",
-  variables = "B25077_001",
+  variables = "B25077_001", # Median Home Value
   year = 2022
 )
 
@@ -45,9 +45,9 @@ sd_value <- get_acs(
 
 sd_value
 
-## vars <- load_variables(2022, "acs5")
+vars <- load_variables(2022, "acs5")
 ## 
-## View(vars)
+View(vars)
 ## 
 
 age_sex_table <- get_acs(
@@ -115,8 +115,65 @@ utah_plot <- ggplot(utah_income, aes(x = estimate,
 
 utah_plot
 
+{
+### California
 library(scales)
 library(stringr)
+
+cali_mhv <- get_acs(
+  geography = "county",
+  variables = "B25077_001",
+  state = "CA",
+  year = 2022,
+  geometry = TRUE
+)
+
+cali_plot <- ggplot(cali_mhv, aes(x = estimate, y = NAME)) + 
+  geom_point()
+
+cali_plot
+
+cali_plot <- ggplot(cali_mhv, aes(x = estimate, 
+                                     y = reorder(NAME, estimate))) + 
+  geom_point(color = "darkblue", size = 2)
+
+cali_plot
+
+cali_plot <- cali_plot + 
+  scale_x_continuous(labels = label_dollar()) + 
+  scale_y_discrete(labels = function(x) str_remove(x, " County, California")) 
+
+cali_plot
+
+cali_plot <- cali_plot + 
+  labs(title = "Median household income, 2018-2022 ACS",
+       subtitle = "Counties in California",
+       caption = "Data acquired with R and tidycensus",
+       x = "ACS estimate",
+       y = "") + 
+  theme_minimal(base_size = 12)
+
+cali_plot
+
+cali_plot_errorbar <- ggplot(cali_mhv, aes(x = estimate, 
+                                              y = reorder(NAME, estimate))) + 
+  geom_errorbar(aes(xmin = estimate - moe, xmax = estimate + moe), #<<
+                width = 0.5, linewidth = 0.5) + 
+  geom_point(color = "darkblue", size = 2) + 
+  scale_x_continuous(labels = label_dollar()) + 
+  scale_y_discrete(labels = function(x) str_remove(x, " County, California")) + 
+  labs(title = "Median home value, 2018-2022 ACS",
+       subtitle = "Counties in California",
+       caption = "Data acquired with R and tidycensus. Error bars represent margin of error around estimates.",
+       x = "ACS estimate",
+       y = "") + 
+  theme_minimal(base_size = 12)
+
+cali_plot_errorbar
+
+mapview(cali_mhv, zcol = "estimate")
+}
+
 
 utah_plot <- utah_plot + 
   scale_x_continuous(labels = label_dollar()) + 
@@ -193,7 +250,7 @@ library(mapview)
 
 mapview(wa_wfh, zcol = "estimate")
 
-ct_income <- get_acs(
+sct_income <- get_acs(
   geography = "county",
   variables = "B19013_001",
   state = "CT",
@@ -204,7 +261,8 @@ ct_income <- get_acs(
 
 mapview(ct_income, zcol = "estimate")
 
-library(tidycensus)
+### Public Use Micro Data
+library(tidyverse)
 
 or_pums <- get_pums(
   variables = c("SEX", "AGEP", "HHT"),
@@ -213,7 +271,7 @@ or_pums <- get_pums(
   year = 2022
 )
 
-or_pums
+or_pums %>% view()
 
 library(tidyverse)
 
@@ -224,7 +282,7 @@ print(sum(or_age_40$PWGTP))
 
 get_acs("state", "B01003_001", state = "OR", survey = "acs1", year = 2022)
 
-## View(pums_variables)
+View(pums_variables)
 
 or_pums_recoded <- get_pums(
   variables = c("SEX", "AGEP", "HHT"),
@@ -295,3 +353,4 @@ or_age_puma <- get_acs(
   year = 2022,
   survey = "acs1"
 )
+
