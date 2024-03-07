@@ -12,6 +12,7 @@ format:
 execute: 
   echo: true
 ---
+
 ```{r setup, include = FALSE}
 library(tidycensus)
 library(tidyverse)
@@ -20,114 +21,104 @@ library(rdeck)
 
 Sys.setenv("MAPBOX_ACCESS_TOKEN" = "pk.eyJ1Ijoia3dhbGtlcnRjdSIsImEiOiJjbHRoYm12eDQwMzZ1MnNvN2JyMzZqYXBpIn0.Sdd16XvAh70IwBrqDD7MzQ")
 
-wfh_tract_list <- read_rds("data/wfh_tract_list.rds")
+wfh_tract_list <- read_rds("./mapping-census-data/data/wfh_tract_list.rds")
 ```
-
 
 ## About me
 
-* Associate Professor of Geography at TCU 
+-   Associate Professor of Geography at TCU
 
-* Spatial data science researcher and consultant
+-   Spatial data science researcher and consultant
 
-* Package developer: __tidycensus__, __tigris__, __mapboxapi__, __crsuggest__, __idbr__ (R), __pygris__ (Python)
+-   Package developer: **tidycensus**, **tigris**, **mapboxapi**, **crsuggest**, **idbr** (R), **pygris** (Python)
 
-* Book: [_Analyzing US Census Data: Methods, Maps and Models in R_](https://walker-data.com/census-r/)
-
+-   Book: [*Analyzing US Census Data: Methods, Maps and Models in R*](https://walker-data.com/census-r/)
 
 ## SSDAN webinar series
 
-* Thurday, February 8: [Working with the 2022 American Community Survey with R and tidycensus](https://walker-data.com/umich-workshop-2024/acs-2022/)
+-   Thurday, February 8: [Working with the 2022 American Community Survey with R and tidycensus](https://walker-data.com/umich-workshop-2024/acs-2022/)
 
-* Thursday, February 22: [Analyzing 2020 Decennial US Census Data in R](https://walker-data.com/umich-workshop-2024/census-2020/)
+-   Thursday, February 22: [Analyzing 2020 Decennial US Census Data in R](https://walker-data.com/umich-workshop-2024/census-2020/)
 
-* __Today: Doing "GIS" and making maps with US Census Data in R__
+-   **Today: Doing "GIS" and making maps with US Census Data in R**
 
 ## Today's agenda
 
-* Hour 1: How to get and explore spatial US Census data using R
+-   Hour 1: How to get and explore spatial US Census data using R
 
-* Hour 2: A tour of map types with R and US Census data
+-   Hour 2: A tour of map types with R and US Census data
 
-* Hour 3: Advanced workflows: automated mapping and spatial analysis
+-   Hour 3: Advanced workflows: automated mapping and spatial analysis
 
 # US Census data: an overview
 
 ## R and RStudio
 
-* R: programming language and software environment for data analysis (and wherever else your imagination can take you!)
+-   R: programming language and software environment for data analysis (and wherever else your imagination can take you!)
 
-* RStudio: integrated development environment (IDE) for R developed by [Posit](https://posit.co/)
+-   RStudio: integrated development environment (IDE) for R developed by [Posit](https://posit.co/)
 
-* Posit Cloud: run RStudio with today's workshop pre-configured at <https://posit.cloud/content/7549022>
+-   Posit Cloud: run RStudio with today's workshop pre-configured at <https://posit.cloud/content/7549022>
 
 # Setup: RStudio and basic data structures in R
 
 ## The Decennial US Census
 
-* Complete count of the US population mandated by Article 1, Sections 2 and 9 in the US Constitution
+-   Complete count of the US population mandated by Article 1, Sections 2 and 9 in the US Constitution
 
-* Directed by the US Census Bureau (US Department of Commerce); conducted every 10 years since 1790
+-   Directed by the US Census Bureau (US Department of Commerce); conducted every 10 years since 1790
 
-* Used for proportional representation / congressional redistricting
+-   Used for proportional representation / congressional redistricting
 
-* Limited set of questions asked about race, ethnicity, age, sex, and housing tenure
+-   Limited set of questions asked about race, ethnicity, age, sex, and housing tenure
 
 ## The American Community Survey
 
-* Annual survey of 3.5 million US households 
+-   Annual survey of 3.5 million US households
 
-* Covers topics not available in decennial US Census data (e.g. income, education, language, housing characteristics)
+-   Covers topics not available in decennial US Census data (e.g. income, education, language, housing characteristics)
 
-* Available as 1-year estimates (for geographies of population 65,000 and greater) and 5-year estimates (for geographies down to the block group)
+-   Available as 1-year estimates (for geographies of population 65,000 and greater) and 5-year estimates (for geographies down to the block group)
 
-* Data delivered as _estimates_ characterized by _margins of error_
+-   Data delivered as *estimates* characterized by *margins of error*
 
 ## How to get Census data
 
-* [data.census.gov](https://data.census.gov) is the main, revamped interactive data portal for browsing and downloading Census datasets
+-   [data.census.gov](https://data.census.gov) is the main, revamped interactive data portal for browsing and downloading Census datasets
 
-* [The US Census **A**pplication **P**rogramming **I**nterface (API)](https://www.census.gov/data/developers/data-sets.html) allows developers to access Census data resources programmatically
+-   [The US Census **A**pplication **P**rogramming **I**nterface (API)](https://www.census.gov/data/developers/data-sets.html) allows developers to access Census data resources programmatically
 
 ## tidycensus
 
-:::: {.columns}
-
+::: columns
 ::: {.column width="70%"}
+-   R interface to the Decennial Census, American Community Survey, Population Estimates Program, Migration Flows, and Public Use Microdata Series APIs
 
-* R interface to the Decennial Census, American Community Survey, Population Estimates Program, Migration Flows, and Public Use Microdata Series APIs
-
-* First released in 2017; over 500,000 downloads from the Posit CRAN mirror
-
+-   First released in 2017; over 500,000 downloads from the Posit CRAN mirror
 :::
 
 ::: {.column width="30%"}
-
 ![](https://walker-data.com/tidycensus/logo.png)
-
 :::
-
-::::
+:::
 
 ## tidycensus: key features
 
-::: {.incremental}
+::: incremental
+-   Wrangles Census data internally to return tidyverse-ready format (or traditional wide format if requested);
 
-- Wrangles Census data internally to return tidyverse-ready format (or traditional wide format if requested);
+-   **Automatically downloads and merges Census geometries to data for mapping**;
 
-- __Automatically downloads and merges Census geometries to data for mapping__; 
+-   Includes a variety of analytic tools to support common Census workflows;
 
-- Includes a variety of analytic tools to support common Census workflows;
-
-- States and counties can be requested by name (no more looking up FIPS codes!)
-  
+-   States and counties can be requested by name (no more looking up FIPS codes!)
 :::
 
 ## Getting started with tidycensus
 
-* To get started, install the packages you'll need for today's workshop
+-   To get started, install the packages you'll need for today's workshop
 
-* If you are using the Posit Cloud environment, these packages are already installed for you
+-   If you are using the Posit Cloud environment, these packages are already installed for you
 
 ```{r install-packages, eval = FALSE}
 install.packages(c("tidycensus", "tidyverse", "mapview", "ggspatial", "leafsync"))
@@ -135,42 +126,39 @@ install.packages(c("tidycensus", "tidyverse", "mapview", "ggspatial", "leafsync"
 
 ## Optional: your Census API key
 
-* tidycensus (and the Census API) can be used without an API key, but you will be limited to 500 queries per day
+-   tidycensus (and the Census API) can be used without an API key, but you will be limited to 500 queries per day
 
-* Power users: visit <https://api.census.gov/data/key_signup.html> to request a key, then activate the key from the link in your email. 
+-   Power users: visit <https://api.census.gov/data/key_signup.html> to request a key, then activate the key from the link in your email.
 
-* Once activated, use the `census_api_key()` function to set your key as an environment variable
+-   Once activated, use the `census_api_key()` function to set your key as an environment variable
 
 ```{r api-key, eval = FALSE}
 library(tidycensus)
 
-census_api_key("YOUR KEY GOES HERE", install = TRUE)
+# census_api_key("YOUR KEY GOES HERE", install = TRUE)
 ```
 
 # Getting spatial US Census data
 
 ## Spatial Census data: the old way
 
-Traditionally, getting "spatial" Census data required: 
+Traditionally, getting "spatial" Census data required:
 
-::: {.incremental}
+::: incremental
+-   Fetching shapefiles from the Census website;
 
-* Fetching shapefiles from the Census website;
+-   Downloading a CSV of data, then cleaning and formatting it;
 
-* Downloading a CSV of data, then cleaning and formatting it;
+-   Loading geometries and data into your GIS of choice;
 
-* Loading geometries and data into your GIS of choice;
-
-* Aligning key fields in your GIS and joining your data
-
+-   Aligning key fields in your GIS and joining your data
 :::
-
 
 ## Getting started with tidycensus
 
-* Your core functions in tidycensus are `get_decennial()` for decennial Census data, and `get_acs()` for ACS data
+-   Your core functions in tidycensus are `get_decennial()` for decennial Census data, and `get_acs()` for ACS data
 
-* Required arguments are `geography` and `variables`
+-   Required arguments are `geography` and `variables`
 
 ```{r decennial}
 #| code-line-numbers: "|2|3|4|5"
@@ -183,9 +171,9 @@ texas_income <- get_acs(
 )
 ```
 
----
+------------------------------------------------------------------------
 
-* ACS data are returned with five columns: `GEOID`, `NAME`, `variable`, `estimate`, and `moe`
+-   ACS data are returned with five columns: `GEOID`, `NAME`, `variable`, `estimate`, and `moe`
 
 ```{r view-decennial}
 texas_income
@@ -193,7 +181,7 @@ texas_income
 
 ## Spatial Census data with tidycensus
 
-* Use the argument `geometry = TRUE` to get pre-joined geometry along with your data!
+-   Use the argument `geometry = TRUE` to get pre-joined geometry along with your data!
 
 ```{r}
 #| code-line-numbers: "|6"
@@ -207,58 +195,47 @@ texas_income_sf <- get_acs(
 )
 ```
 
----
+------------------------------------------------------------------------
 
-* We can now make a simple map with `plot()`: 
+-   We can now make a simple map with `plot()`:
 
 ```{r}
 plot(texas_income_sf['estimate'])
 ```
 
+## Looking under the hood: *simple features* in R
 
-## Looking under the hood: _simple features_ in R
-
-:::: {.columns}
-
-::: {.column}
-
-<img src="https://user-images.githubusercontent.com/520851/34887433-ce1d130e-f7c6-11e7-83fc-d60ad4fae6bd.gif" style="width: 400px">
-
+::: columns
+::: column
+<img src="https://user-images.githubusercontent.com/520851/34887433-ce1d130e-f7c6-11e7-83fc-d60ad4fae6bd.gif" style="width: 400px"/>
 :::
 
-::: {.column}
+::: column
+-   The sf package implements a *simple features data model* for vector spatial data in R
 
-* The sf package implements a _simple features data model_ for vector spatial data in R
-
-* Vector geometries: _points_, _lines_, and _polygons_ stored in a list-column of a data frame
-
+-   Vector geometries: *points*, *lines*, and *polygons* stored in a list-column of a data frame
+:::
 :::
 
-::::
+------------------------------------------------------------------------
 
----
-
-* Spatial data are returned with five data columns: `GEOID`, `NAME`, `variable`, `estimate`, and `moe`, along with a `geometry` column representing the shapes of locations
+-   Spatial data are returned with five data columns: `GEOID`, `NAME`, `variable`, `estimate`, and `moe`, along with a `geometry` column representing the shapes of locations
 
 ```{r view-acs-1yr}
 texas_income_sf
 ```
 
----
+------------------------------------------------------------------------
 
 ## Interactive viewing with `mapview()`
 
-:::: {.columns}
+::: columns
+::: column
+<img src="https://github.com/tim-salabim/mvl/blob/cstriestohelp/imagery/animated/box_anim.gif?raw=true" style="width: 400px"/>
+:::
 
-::: {.column}
-
-<img src="https://github.com/tim-salabim/mvl/blob/cstriestohelp/imagery/animated/box_anim.gif?raw=true" style="width: 400px">
-
-::: 
-
-::: {.column}
-
-* The __mapview__ package allows for interactive viewing of spatial data in R
+::: column
+-   The **mapview** package allows for interactive viewing of spatial data in R
 
 ```{r tx-mapview, eval = FALSE}
 library(mapview)
@@ -268,12 +245,10 @@ mapview(
   zcol = "estimate"
 )
 ```
-
+:::
 :::
 
-::::
-
----
+------------------------------------------------------------------------
 
 ```{r tx-mapview-show, out.width = "850px", echo = FALSE}
 library(mapview)
@@ -281,29 +256,25 @@ library(mapview)
 mapview(texas_income_sf, zcol = "estimate")
 ```
 
-
 # Understanding geography and variables in tidycensus
-
 
 ## US Census Geography
 
 ![Source: US Census Bureau](img/census_diagram.png)
 
-
 ## Geography in tidycensus
 
-* Information on available geographies, and how to specify them, can be found [in the tidycensus documentation](https://walker-data.com/tidycensus/articles/basic-usage.html#geography-in-tidycensus-1)
+-   Information on available geographies, and how to specify them, can be found [in the tidycensus documentation](https://walker-data.com/tidycensus/articles/basic-usage.html#geography-in-tidycensus-1)
 
-![](img/tidycensus_geographies.png){width=600}
-
+![](img/tidycensus_geographies.png){width="600"}
 
 ## Searching for variables
 
-* To search for variables, use the `load_variables()` function along with a year and dataset
+-   To search for variables, use the `load_variables()` function along with a year and dataset
 
-* For the 2022 5-year ACS, use `"acs5"` for the Detailed Tables; `"acs5/profile"` for the Data Profile; `"acs5/subject"` for the Subject Tables; and `"acs5/cprofile"` for the Comparison Profile
+-   For the 2022 5-year ACS, use `"acs5"` for the Detailed Tables; `"acs5/profile"` for the Data Profile; `"acs5/subject"` for the Subject Tables; and `"acs5/cprofile"` for the Comparison Profile
 
-* The `View()` function in RStudio allows for interactive browsing and filtering
+-   The `View()` function in RStudio allows for interactive browsing and filtering
 
 ```{r search-variables, eval = FALSE}
 vars <- load_variables(2022, "acs5")
@@ -312,11 +283,11 @@ View(vars)
 
 ```
 
----
+------------------------------------------------------------------------
 
 ## Small-area spatial demographic data
 
-* Smaller areas like Census tracts or block groups are available with `geography = "tract"` or `geography = "block group"`; one or more counties can optionally be specified to focus your query
+-   Smaller areas like Census tracts or block groups are available with `geography = "tract"` or `geography = "block group"`; one or more counties can optionally be specified to focus your query
 
 ```{r king-income}
 #| code-line-numbers: "|2|5,6"
@@ -333,27 +304,25 @@ nyc_income <- get_acs(
 
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 mapview(nyc_income, zcol = "estimate")
 ```
 
-
 ---
 class: middle, center, inverse
 
 ## Spatial data structure in tidycensus
-
 ---
 
 ## "Tidy" or long-form data
 
-* The default data structure returned by __tidycensus__ is "tidy" or long-form data, with variables by geography stacked by row
+-   The default data structure returned by **tidycensus** is "tidy" or long-form data, with variables by geography stacked by row
 
-* For spatial data, this means that geometries will also be stacked, which is helpful for group-wise analysis and visualization
+-   For spatial data, this means that geometries will also be stacked, which is helpful for group-wise analysis and visualization
 
----
+------------------------------------------------------------------------
 
 ## "Tidy" or long-form data
 
@@ -374,20 +343,19 @@ san_diego_race <- get_acs(
 
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r show-tidy-data}
 san_diego_race
 ```
 
+------------------------------------------------------------------------
 
----
+## "Wide" data
 
-## "Wide" data 
+-   The argument `output = "wide"` spreads Census variables across the columns, returning one row per geographic unit and one column per variable
 
-* The argument `output = "wide"` spreads Census variables across the columns, returning one row per geographic unit and one column per variable
-
-* This will be a more familiar data structure for traditional desktop GIS users
+-   This will be a more familiar data structure for traditional desktop GIS users
 
 ## "Wide" data
 
@@ -410,54 +378,45 @@ san_diego_race_wide <- get_acs(
 )
 ```
 
-
----
+------------------------------------------------------------------------
 
 ```{r show-wide-data}
 san_diego_race_wide
 ```
 
-
 ---
 class: middle, center, inverse
 
 ## Working with Census geometry
-
 ---
 
-## Census geometry and the __tigris__ R package
+## Census geometry and the **tigris** R package
 
-:::: {.columns}
-
-::: {.column}
-
-<img src="https://raw.githubusercontent.com/walkerke/tigris/master/tools/readme/tigris_sticker.png" style="width: 400px">
-
+::: columns
+::: column
+<img src="https://raw.githubusercontent.com/walkerke/tigris/master/tools/readme/tigris_sticker.png" style="width: 400px"/>
 :::
 
-::: {.column}
+::: column
+-   tidycensus uses the **tigris** R package internally to acquire Census shapefiles
 
-* tidycensus uses the __tigris__ R package internally to acquire Census shapefiles
-
-* By default, the [Cartographic Boundary shapefiles](https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html) are used, which are pre-clipped to the US shoreline
-
+-   By default, the [Cartographic Boundary shapefiles](https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html) are used, which are pre-clipped to the US shoreline
+:::
 :::
 
-::::
-
----
+------------------------------------------------------------------------
 
 ## Problem: interior water areas
 
-* Let's re-visit the NYC income map
+-   Let's re-visit the NYC income map
 
-* Water areas throughout the city are included within tract polygons, making patterns difficult to observe for those who know the area
+-   Water areas throughout the city are included within tract polygons, making patterns difficult to observe for those who know the area
 
-* `erase_water()` in the __tigris__ package offers a solution; it automates the removal of water areas from your shapes
+-   `erase_water()` in the **tigris** package offers a solution; it automates the removal of water areas from your shapes
 
-* Tips: tune the `area_threshold` to selectively remove water area; use `cb = FALSE` to avoid sliver polygons
+-   Tips: tune the `area_threshold` to selectively remove water area; use `cb = FALSE` to avoid sliver polygons
 
----
+------------------------------------------------------------------------
 
 ```{r}
 #| code-line-numbers: "|8"
@@ -473,9 +432,10 @@ nyc_income_tiger <- get_acs(
   geometry = TRUE
 )
 ```
----
 
-* `area_threshold = 0.5` means we are removing the largest 50% of water areas in the area 
+------------------------------------------------------------------------
+
+-   `area_threshold = 0.5` means we are removing the largest 50% of water areas in the area
 
 ```{r nyc-erase}
 #| code-line-numbers: "|7"
@@ -493,55 +453,49 @@ nyc_erase <- erase_water(
 
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 mapview(nyc_erase, zcol = "estimate")
 ```
 
----
-
+------------------------------------------------------------------------
 
 ## Part 1 exercises
 
-1. Use the `load_variables()` function to find a variable that interests you that we haven't used yet.  
+1.  Use the `load_variables()` function to find a variable that interests you that we haven't used yet.
 
-2. Use `get_acs()` to fetch spatial ACS data on that variable for a geography and location of your choice, then use `mapview()` to display your data interactively.
-
+2.  Use `get_acs()` to fetch spatial ACS data on that variable for a geography and location of your choice, then use `mapview()` to display your data interactively.
 
 # A tour of map types with R and US Census data
 
-
 ## Mapping in R
 
-* R has a robust set of tools for cartographic visualization that make it a suitable alternative to desktop GIS software in many instances
+-   R has a robust set of tools for cartographic visualization that make it a suitable alternative to desktop GIS software in many instances
 
-* Popular packages for cartography include __ggplot2__, __tmap__, and __mapsf__
+-   Popular packages for cartography include **ggplot2**, **tmap**, and **mapsf**
 
-* Today, we'll be focusing on ggplot2; [see Chapter 6 of my book for similar examples using tmap](https://walker-data.com/census-r/)
-
+-   Today, we'll be focusing on ggplot2; [see Chapter 6 of my book for similar examples using tmap](https://walker-data.com/census-r/)
 
 ## ggplot2 and `geom_sf()`
 
-* ggplot2: R's most popular visualization package (over 137 million downloads!)
+-   ggplot2: R's most popular visualization package (over 137 million downloads!)
 
-* ggplot2 graphics are defined by an _aesthetic mapping_ and one or more _geoms_
+-   ggplot2 graphics are defined by an *aesthetic mapping* and one or more *geoms*
 
-* `geom_sf()` is a special geom that interprets the geometry type of your spatial data and visualizes it accordingly
+-   `geom_sf()` is a special geom that interprets the geometry type of your spatial data and visualizes it accordingly
 
-* As a result, we can make attractive maps using familiar ggplot2 syntax
-
+-   As a result, we can make attractive maps using familiar ggplot2 syntax
 
 # Mapping Census data with ggplot2
 
-
 ## Continuous choropleth
 
-* By default, ggplot2 will apply a continuous color palette to create __choropleth__ maps
+-   By default, ggplot2 will apply a continuous color palette to create **choropleth** maps
 
-* Choropleth maps: the shading of a polygon / shape is mapped to a data attribute
+-   Choropleth maps: the shading of a polygon / shape is mapped to a data attribute
 
----
+------------------------------------------------------------------------
 
 ```{r choro1}
 library(tidyverse)
@@ -552,12 +506,11 @@ ggplot(san_diego_asian, aes(fill = estimate)) +
   geom_sf()
 ```
 
-
 ## Continuous choropleth with styling
 
-* We can apply some styling to customize our choropleth maps
+-   We can apply some styling to customize our choropleth maps
 
-* Used here: a [viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html) color palette, which is built-in to ggplot2
+-   Used here: a [viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html) color palette, which is built-in to ggplot2
 
 ```{r choro2}
 #| code-line-numbers: "|3|4|5-8"
@@ -572,18 +525,17 @@ cont_choro <- ggplot(san_diego_asian, aes(fill = estimate)) +
        caption = "2018-2022 ACS | tidycensus R package")
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 cont_choro
 ```
 
-
----
+------------------------------------------------------------------------
 
 ## Classed choropleth
 
-* We can also create a binned choropleth; ggplot2 will identify "pretty" breaks, or custom breaks can be supplied
+-   We can also create a binned choropleth; ggplot2 will identify "pretty" breaks, or custom breaks can be supplied
 
 ```{r choro3}
 #| code-line-numbers: "|4"
@@ -598,18 +550,17 @@ classed_choro <- ggplot(san_diego_asian, aes(fill = estimate)) +
        caption = "2018-2022 ACS | tidycensus R package")
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r choro3-show}
 classed_choro
 ```
 
-
----
+------------------------------------------------------------------------
 
 ## Faceted choropleth maps
 
-* Spatial ACS data in tidy (long) format can be _faceted_ by a grouping variable, allowing for comparative mapping
+-   Spatial ACS data in tidy (long) format can be *faceted* by a grouping variable, allowing for comparative mapping
 
 ```{r facets}
 #| code-line-numbers: "|5"
@@ -625,36 +576,30 @@ faceted_choro <- ggplot(san_diego_race, aes(fill = estimate)) +
        caption = "2018-2022 ACS | tidycensus R package")
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r facets-show, out.width = "850px", echo = FALSE}
 faceted_choro
 ```
 
-
 ---
 class: middle, center, inverse
 
 ## Mapping count data
-
 ---
 
 ## Mapping count data
 
-:::: {.columns}
+::: columns
+::: column
+-   At times, you'll want to show variations in *counts* rather than rates on your maps of ACS data
 
-::: {.column}
+-   Choropleth maps are poorly suited for count data
 
-* At times, you'll want to show variations in _counts_ rather than rates on your maps of ACS data
-
-* Choropleth maps are poorly suited for count data
-
-* Let's grab some count data for race / ethnicity and consider some alternatives
-
+-   Let's grab some count data for race / ethnicity and consider some alternatives
 :::
 
-::: {.column}
-
+::: column
 ```{r orange-race-counts}
 #| code-line-numbers: "|3-8"
 
@@ -672,22 +617,20 @@ san_diego_race_counts <- get_acs(
   year = 2022
 )
 ```
-
+:::
 :::
 
-::::
-
----
+------------------------------------------------------------------------
 
 ## Graduated symbol maps
 
-* Graduated symbol maps show difference on a map with the size of symbols (often circles)
+-   Graduated symbol maps show difference on a map with the size of symbols (often circles)
 
-* They are better for count data than choropleth maps as the shapes are directly comparable (unlike differentially-sized polygons)
+-   They are better for count data than choropleth maps as the shapes are directly comparable (unlike differentially-sized polygons)
 
-* We'll need to convert our data to _centroids_ to plot graduated symbols in ggplot2
+-   We'll need to convert our data to *centroids* to plot graduated symbols in ggplot2
 
----
+------------------------------------------------------------------------
 
 ```{r orange-race-centroids}
 #| code-line-numbers: "|8"
@@ -705,11 +648,11 @@ centroids <- st_centroid(san_diego_hispanic)
 
 ## Graduated symbol maps
 
-* We'll first plot a base layer of Census tracts, then a layer of graduated symbols on top
+-   We'll first plot a base layer of Census tracts, then a layer of graduated symbols on top
 
-* Use `scale_size_area()` to plot _proportional symbols_
+-   Use `scale_size_area()` to plot *proportional symbols*
 
----
+------------------------------------------------------------------------
 
 ```{r plot-graduated}
 #| code-line-numbers: "|2|9"
@@ -725,22 +668,21 @@ grad_symbol <- ggplot() +
   scale_size_area(max_size = 6) 
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 grad_symbol
 ```
 
-
----
+------------------------------------------------------------------------
 
 ## Dot-density mapping
 
-* It can be difficult to show _heterogeneity_ or _mixing_ of different categories on maps
+-   It can be difficult to show *heterogeneity* or *mixing* of different categories on maps
 
-* Dot-density maps scatter dots proportionally to data size; dots can be colored to show mixing of categories
+-   Dot-density maps scatter dots proportionally to data size; dots can be colored to show mixing of categories
 
-* Traditionally, dot-density maps are slow to make in R; tidycensus's `as_dot_density()` function addresses this
+-   Traditionally, dot-density maps are slow to make in R; tidycensus's `as_dot_density()` function addresses this
 
 ## Dot-density mapping
 
@@ -753,7 +695,7 @@ san_diego_race_dots <- as_dot_density(
 )
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r show-dots}
 san_diego_race_dots
@@ -761,9 +703,9 @@ san_diego_race_dots
 
 ## Dot-density mapping
 
-* Like the graduated symbol map, we plot points over a base layer, but in this case with a much smaller size
+-   Like the graduated symbol map, we plot points over a base layer, but in this case with a much smaller size
 
-* Use `override.aes` in `guide_legend()` to plot visible colors in the legend
+-   Use `override.aes` in `guide_legend()` to plot visible colors in the legend
 
 ```{r dot-plot}
 #| code-line-numbers: "|2|3|5"
@@ -778,7 +720,7 @@ dot_density_map <- ggplot() +
        caption = "2018-2022 ACS | 1 dot = approximately 200 people")
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r sd-dot-map}
 dot_density_map
@@ -786,7 +728,7 @@ dot_density_map
 
 ## Adding a basemap
 
-* You may instead want a basemap as a reference layer; this is straightforward with the ggspatial package and `annotation_map_tile()`
+-   You may instead want a basemap as a reference layer; this is straightforward with the ggspatial package and `annotation_map_tile()`
 
 ```{r}
 #| code-line-numbers: "|4"
@@ -803,18 +745,17 @@ dot_density_with_basemap <- ggplot() +
        caption = "2018-2022 ACS | 1 dot = approximately 200 people")
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 dot_density_with_basemap
 ```
 
-
----
+------------------------------------------------------------------------
 
 ## Customizing interactive maps with `mapview()`
 
-* `mapview()` accepts custom color palettes and labels, making it a suitable engine for interactive maps for presentations!
+-   `mapview()` accepts custom color palettes and labels, making it a suitable engine for interactive maps for presentations!
 
 ```{r mapview-custom}
 library(viridisLite)
@@ -826,21 +767,21 @@ mv1 <- mapview(san_diego_asian, zcol = "estimate",
         col.regions = colors)
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r mapview-custom-show}
 mv1
 ```
 
----
+------------------------------------------------------------------------
 
 ## Linked interactive maps with `mapview()`
 
-* In mapview, layers can be stacked with the `+` operator or swiped between with the `|` operator
+-   In mapview, layers can be stacked with the `+` operator or swiped between with the `|` operator
 
-* __leafsync__ takes this one step further by creating side-by-side synced maps
+-   **leafsync** takes this one step further by creating side-by-side synced maps
 
----
+------------------------------------------------------------------------
 
 ```{r leafsync}
 library(leafsync)
@@ -858,18 +799,17 @@ m2 <- mapview(san_diego_white, zcol = "estimate",
 mv2 <- sync(m1, m2)
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 mv2
 ```
 
-
 # Bonus: migration flow mapping
 
 ## Installing the rdeck package
 
-* To run this example, you'll need the rdeck package - which is not on CRAN
+-   To run this example, you'll need the rdeck package - which is not on CRAN
 
 ```{r}
 #| eval: false
@@ -880,10 +820,9 @@ install_github("qfes/rdeck")
 
 ```
 
-
 ## Getting migration flow data
 
-* The `get_flows()` function obtains origin-destination flow data from the 5-year ACS
+-   The `get_flows()` function obtains origin-destination flow data from the 5-year ACS
 
 ```{r}
 library(tidyverse)
@@ -926,17 +865,15 @@ flow_map <- rdeck(map_style = mapbox_light(),
           )
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 flow_map
 ```
 
-
-
 ## Part 2 exercises
 
-* Try reproducing one of the maps you created in this section with a different state / county combination.  What patterns do you observe?
+-   Try reproducing one of the maps you created in this section with a different state / county combination. What patterns do you observe?
 
 # Advanced workflows: automated mapping and small-area time series analysis
 
@@ -944,26 +881,24 @@ flow_map
 
 ## Challenge: making 100 maps at once
 
-Let's tackle a hypothetical example you might get at work.  Your boss has assigned you the following task: 
+Let's tackle a hypothetical example you might get at work. Your boss has assigned you the following task:
 
-> I'd like you to look at geographic patterns in working from home for the 100 largest counties by population in the US.  Make me maps for each county.  
+> I'd like you to look at geographic patterns in working from home for the 100 largest counties by population in the US. Make me maps for each county.
 
 Related blog post: <https://walker-data.com/posts/iterative-mapping/>
 
-__Warning__: may be too memory-intensive for Posit Cloud users
+**Warning**: may be too memory-intensive for Posit Cloud users
 
 ## Challenge: making 100 maps at once
 
-At first, this may seem like a significant task!  You'll need to: 
+At first, this may seem like a significant task! You'll need to:
 
-::: {.incremental}
+::: incremental
+-   Generate a list of the 100 largest counties by population in the US;
 
-* Generate a list of the 100 largest counties by population in the US;
+-   Get data for those counties on working from home at a sufficiently granular geographic level to show patterns;
 
-* Get data for those counties on working from home at a sufficiently granular geographic level to show patterns;
-
-* Make and deliver 100 maps.
-
+-   Make and deliver 100 maps.
 :::
 
 ## Step 1: find the 100 largest counties in the US by population
@@ -981,7 +916,7 @@ top100counties <- get_acs(
   slice_max(estimate, n = 100)
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 top100counties
@@ -989,17 +924,17 @@ top100counties
 
 ## Step 2: pull tract-level Census data by county
 
-* We now need to organize tract data county-by-county using the information in the table.  But how can we do this efficiently?
+-   We now need to organize tract data county-by-county using the information in the table. But how can we do this efficiently?
 
-* Something to remember (from [Downey, _Think Python_](https://greenteapress.com/thinkpython2/thinkpython2.pdf): )
+-   Something to remember (from [Downey, *Think Python*](https://greenteapress.com/thinkpython2/thinkpython2.pdf): )
 
 > Repeating identical or similar tasks without making errors is something that computers do well and people do poorly
 
-* My preference for iteration in R: the __purrr__ package
+-   My preference for iteration in R: the **purrr** package
 
 ## Step 2: pull tract-level data by county
 
-* Here's how I'd do it: 
+-   Here's how I'd do it:
 
 ```{r, eval = FALSE}
 #| code-line-numbers: "|1|2|3|4|5|7-14|10,11"
@@ -1023,23 +958,21 @@ wfh_tract_list <- top100counties %>%
 
 ## What just happened?
 
-::: {.incremental}
+::: incremental
+1.  We *split* our dataset of counties into separate datasets by `NAME` with `split()`
 
-1. We _split_ our dataset of counties into separate datasets by `NAME` with `split()`
+2.  We used `map()` to set up iteration over *each* county dataset
 
-2. We used `map()` to set up iteration over _each_ county dataset
+3.  We extract the state and county FIPS codes for each of the top 100 counties
 
-3. We extract the state and county FIPS codes for each of the top 100 counties
-
-4. Finally, we call `get_acs()` using those state and county FIPS codes.  
+4.  Finally, we call `get_acs()` using those state and county FIPS codes.
 
 This is why you want a Census API key!
-
 :::
 
-## Now, let's make some maps: 
+## Now, let's make some maps:
 
-* We can again use `map()` to... well... make some maps
+-   We can again use `map()` to... well... make some maps
 
 ```{r}
 library(mapview)
@@ -1053,32 +986,31 @@ wfh_maps <- map(wfh_tract_list, function(county) {
 })
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 wfh_maps$`San Mateo County, California`
 ```
 
-
 # Small-area time-series analysis
 
 ## Prompt: analyzing change over time
 
-Nice work!  Now, you have a new follow-up from your boss: 
+Nice work! Now, you have a new follow-up from your boss:
 
-> Interesting stuff.  However, I'm really interested in knowing how work-from-home is changing over time in our target markets.  Could you show me where work-from-home has increased the most in Salt Lake City?
+> Interesting stuff. However, I'm really interested in knowing how work-from-home is changing over time in our target markets. Could you show me where work-from-home has increased the most in Salt Lake City?
 
 ## Time-series and the ACS: some notes
 
-* 5-year ACS data represent _overlapping survey years_, meaning that direct comparison between overlapping datasets is not typically recommended
+-   5-year ACS data represent *overlapping survey years*, meaning that direct comparison between overlapping datasets is not typically recommended
 
-* The Census Bureau recommends comparing non-overlapping years in the 5-year ACS
+-   The Census Bureau recommends comparing non-overlapping years in the 5-year ACS
 
-* For 2018-2022 data, available 5-year intervals for comparison are 2008-2012 and 2013-2017
+-   For 2018-2022 data, available 5-year intervals for comparison are 2008-2012 and 2013-2017
 
 ## The ACS Comparison Profile
 
-* The Comparison Profile includes data on the current 5-year ACS and the 5-year ACS that ends 5 years prior to help with time-series comparisons  
+-   The Comparison Profile includes data on the current 5-year ACS and the 5-year ACS that ends 5 years prior to help with time-series comparisons
 
 ```{r cp-tables}
 utah_wfh_compare <- get_acs(
@@ -1092,28 +1024,27 @@ utah_wfh_compare <- get_acs(
 )
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r cp-tables-show}
 utah_wfh_compare
 ```
 
-
 ## Geography and making comparisons
 
-* Data in the Comparison Profile tables is only available down to the county level ([though counties can change from ACS to ACS!](https://walker-data.com/umich-workshop-2024/census-2020/#/caveat-changing-geographies))
+-   Data in the Comparison Profile tables is only available down to the county level ([though counties can change from ACS to ACS!](https://walker-data.com/umich-workshop-2024/census-2020/#/caveat-changing-geographies))
 
-* Comparing _neighborhood-level_ change across ACS datasets can introduce additional challenge as Census tract and block group boundaries may differ from previous years
+-   Comparing *neighborhood-level* change across ACS datasets can introduce additional challenge as Census tract and block group boundaries may differ from previous years
 
----
+------------------------------------------------------------------------
 
 ## New boundaries drawn with the 2020 Cenus
 
-* Locations with significant population growth (e.g. suburban Collin County, Texas) will have Census tracts / block groups with large populations subdivided in the 2020 Census
+-   Locations with significant population growth (e.g. suburban Collin County, Texas) will have Census tracts / block groups with large populations subdivided in the 2020 Census
 
-* Example: total population by Census tract in Collin County in the 2013-2017 ACS (on the left) and the 2018-2022 ACS (on the right)
+-   Example: total population by Census tract in Collin County in the 2013-2017 ACS (on the left) and the 2018-2022 ACS (on the right)
 
----
+------------------------------------------------------------------------
 
 ```{r collin-compare, echo = FALSE}
 library(patchwork)
@@ -1142,14 +1073,13 @@ ggplot(ts_maps, aes(fill = estimate)) +
 class: middle, center, inverse
 
 ## Discussion: interpolating data between different sets of Census geographies
-
 ---
 
 ## Data setup
 
-* Let's grab data on the population working from home by Census tract in Salt Lake City
+-   Let's grab data on the population working from home by Census tract in Salt Lake City
 
-* Use a projected coordinate reference system to speed things up!
+-   Use a projected coordinate reference system to speed things up!
 
 ```{r get-wfh-data}
 library(sf)
@@ -1163,17 +1093,17 @@ wfh_22 <- get_acs(geography = "tract", variables = "B08006_017", year = 2022,
   st_transform(6620)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Method 1: area-weighted interpolation
 
-* _Interpolating_ data between sets of boundaries involves the use of _weights_ to re-distribute data from one geography to another
+-   *Interpolating* data between sets of boundaries involves the use of *weights* to re-distribute data from one geography to another
 
-* A common method is _area-weighted interpolation_, which allocates information from one geography to another weighted by the area of overlap
+-   A common method is *area-weighted interpolation*, which allocates information from one geography to another weighted by the area of overlap
 
-* Typically more accurate when going _backward_, as many new tracts will "roll up" within parent tracts from a previous Census (though not always)
+-   Typically more accurate when going *backward*, as many new tracts will "roll up" within parent tracts from a previous Census (though not always)
 
----
+------------------------------------------------------------------------
 
 ```{r areal-interpolate}
 library(sf)
@@ -1182,7 +1112,6 @@ wfh_22_to_17 <- wfh_22 %>%
   select(estimate) %>%
   st_interpolate_aw(to = wfh_17, extensive = TRUE)
 ```
-
 
 ## Area-weighted interpolation
 
@@ -1199,18 +1128,17 @@ m17a <- mapview(wfh_22_to_17, zcol = "estimate", layer.name = "2015 geographies"
 sync(m22a, m17a)
 ```
 
-
----
+------------------------------------------------------------------------
 
 ## Method 2: population-weighted interpolation
 
-* If you need to go _forward_, area-weighted interpolation may be very inaccurate as it can incorrectly allocate large values to low-density / empty areas
+-   If you need to go *forward*, area-weighted interpolation may be very inaccurate as it can incorrectly allocate large values to low-density / empty areas
 
-* _Population-weighted interpolation_ will instead use an underlying dataset explaining the population distribution as weights
+-   *Population-weighted interpolation* will instead use an underlying dataset explaining the population distribution as weights
 
-* Example: population-weighted interpolation using block population weights from the 2020 Census
+-   Example: population-weighted interpolation using block population weights from the 2020 Census
 
----
+------------------------------------------------------------------------
 
 ## In tidycensus: `interpolate_pw()`
 
@@ -1247,15 +1175,15 @@ m22b <- mapview(wfh_17_to_22, zcol = "estimate", layer.name = "2022 geographies"
 sync(m17b, m22b)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Evaluating change over time
 
-* With consistent geographies, we can now join 2017 and 2022 data and evaluate change over time
+-   With consistent geographies, we can now join 2017 and 2022 data and evaluate change over time
 
-* [We covered this workflow in more detail in the February 22nd workshop](https://walker-data.com/umich-workshop-2024/census-2020/#/how-have-areas-changed-since-the-2010-census)
+-   [We covered this workflow in more detail in the February 22nd workshop](https://walker-data.com/umich-workshop-2024/census-2020/#/how-have-areas-changed-since-the-2010-census)
 
----
+------------------------------------------------------------------------
 
 ## Evaluating change over time
 
@@ -1272,14 +1200,10 @@ wfh_shift <- wfh_17_to_22 %>%
   )
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 mapview(wfh_shift, zcol = "shift")
 ```
 
-
-
-
 # Thank you!
-
