@@ -261,8 +261,20 @@ sct_income <- get_acs(
 
 mapview(ct_income, zcol = "estimate")
 
+<<<<<<< HEAD
 ### Public Use Micro Data
 library(tidyverse)
+=======
+
+library(tigris)
+library(mapview)
+ct_tract_21 <- tracts("CT", cb = TRUE, year = 2021)
+ct_tract_22 <- tracts("CT", cb = TRUE, year = 2022)
+
+mapview(ct_tract_21) | mapview(ct_tract_22)
+
+library(tidycensus)
+>>>>>>> 2fc48003cc020d66b60e5008648f6eb2840f059b
 
 or_pums <- get_pums(
   variables = c("SEX", "AGEP", "HHT"),
